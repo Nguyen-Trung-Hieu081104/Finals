@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Home</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'blog/styles.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+            color: #111827;
+        }
+        header {
+            background-color: #1f2937;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        header a {
+            color: #93c5fd;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 2.25rem;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.2s;
+        }
+        li:hover {
+            background-color: #f3f4f6;
+        }
+        li a {
+            text-decoration: none;
+            color: #1d4ed8;
+            font-weight: 500;
+        }
+        li a:hover {
+            text-decoration: underline;
+        }
+        .auth-info {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .no-posts {
+            color: #6b7280;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Blog</h1>
+        <div class="auth-info">
+            {% if user.is_authenticated %}
+                Logged in as <strong>{{ user.username }}</strong> | 
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a> | 
+                <a href="{% url 'signup' %}">Sign Up</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <h2>Blog Posts</h2>
+
+        {% if posts %}
+            <ul>
+                {% for post in posts %}
+                    <li>
+                        <a href="{% url 'post_detail' post.id %}">
+                            {{ post.title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-posts">No blog posts found.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
