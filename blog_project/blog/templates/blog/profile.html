@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-container {
+            max-width: 700px;
+            margin: 60px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-header img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #0d6efd;
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            font-size: 28px;
+            color: #222;
+        }
+
+        .profile-info {
+            margin-bottom: 30px;
+        }
+
+        .profile-info p {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #444;
+        }
+
+        .profile-info label {
+            font-weight: 600;
+            color: #000;
+        }
+
+        form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        form p {
+            margin-bottom: 15px;
+        }
+
+        form label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        form button[type="submit"] {
+            margin-top: 10px;
+            background-color: #0d6efd;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        form button[type="submit"]:hover {
+            background-color: #0b5ed7;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        .actions a {
+            text-decoration: none;
+            background: #0d6efd;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin: 0 8px;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .actions a:hover {
+            background: #0b5ed7;
+        }
+
+        @media (max-width: 600px) {
+            .profile-container {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-header img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            {% if user_profile.profile_picture %}
+                <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture">
+            {% else %}
+                <img src="https://via.placeholder.com/90" alt="Profile Picture">
+            {% endif %}
+            <h2>{{ user.username }}</h2>
+        </div>
+
+        <div class="profile-info">
+            <p><label>Email:</label> {{ user.email }}</p>
+            <p><label>First Name:</label> {{ user.first_name }}</p>
+            <p><label>Last Name:</label> {{ user.last_name }}</p>
+            <p><label>Date Joined:</label> {{ user.date_joined }}</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ email_form.as_p }}
+            <p>
+                <label for="{{ profile_form.nickname.id_for_label }}">Nickname:</label>
+                {{ profile_form.nickname }}
+            </p>
+            <p>
+                <label for="{{ profile_form.profile_picture.id_for_label }}">Profile Picture:</label>
+                {{ profile_form.profile_picture }}
+            </p>
+            <button type="submit">Update Profile</button>
+        </form>
+
+        <div class="actions">
+            <a href="{% url 'logout' %}">Logout</a>
+            <a href="{% url 'message_board' %}">Back to Board</a>
+        </div>
+    </div>
+</body>
+</html>
