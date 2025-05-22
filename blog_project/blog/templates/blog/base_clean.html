@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Blog Site{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'blog/styles.css' %}" />
+</head>
+<body>
+    <header>
+        <h1>Blog Site</h1>
+        <nav>
+            <div class="nav-buttons">
+                <button onclick="window.location.href='{% url 'message_board' %}';">Message Board</button>
+                <button onclick="window.location.href='{% url 'profile' %}';">Profile</button>
+                <button onclick="window.location.href='{% url 'logout' %}';">Logout</button>
+            </div>
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2025 Blog Site</p>
+    </footer>
+</body>
+</html>

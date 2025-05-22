@@ -1,0 +1,259 @@
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block content %}
+  <style>
+    /* Enhanced Styles */
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    h2, h3, h4 {
+      color: #2c3e50;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 12px 18px;
+      border-left: 6px solid #f5c6cb;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    ul.blog-list, ul.post-list, ul.message-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul.blog-list li, ul.post-list li, ul.message-list li {
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .selected-blog {
+      font-weight: bold;
+      color: #34495e;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+      margin-left: 8px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    form.inline-form {
+      display: inline-block;
+      margin-left: 8px;
+    }
+
+    img.profile-pic {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      vertical-align: middle;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .message-content {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .message-meta {
+      font-style: italic;
+      color: #888;
+      font-size: 0.85em;
+      margin-left: 5px;
+    }
+
+    .post-description {
+      font-style: italic;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .post-content {
+      margin: 0.5rem 0 1rem 0;
+    }
+
+    form {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    form input, form textarea, form select {
+      width: 100%;
+      max-width: 600px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .pagination {
+      margin-top: 2rem;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .pagination a {
+      display: inline-block;
+      padding: 8px 14px;
+      margin: 0 4px;
+      background-color: #eee;
+      border-radius: 6px;
+      color: #007bff;
+      transition: background-color 0.2s;
+    }
+
+    .pagination a:hover {
+      background-color: #ccc;
+    }
+  </style>
+
+  {% if error_message %}
+    <div class="error-message">{{ error_message }}</div>
+  {% else %}
+    <h2>User Blogs</h2>
+    <div class="nav-buttons" style="margin-bottom: 20px;">
+      <a href="{% url 'create_blog' %}" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Make Blog</a>
+    </div>
+    <ul class="blog-list">
+      {% for blog in blogs %}
+        <li>
+          {% if blog == selected_blog %}
+            <span class="selected-blog">{{ blog.title }}</span>
+            {% if user == blog.user %}
+              <form method="post" action="{% url 'delete_blog' blog.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this blog?');">
+                {% csrf_token %}
+                <button type="submit">🗑 Delete</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'user_blogs' user_id=blog.user.id %}?blog_id={{ blog.id }}">{{ blog.title }}</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if selected_blog %}
+      <h3>Messages on Blog "{{ selected_blog.title }}"</h3>
+      <ul class="message-list">
+        {% for message in blog_messages %}
+          <li>
+            {% if message.user.userprofile.profile_picture %}
+              <img src="{{ message.user.userprofile.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+            {% endif %}
+            <strong>{{ message.user.userprofile.nickname|default:message.user.username }}:</strong>
+            <span class="message-content">{{ message.content }}</span>
+            <span class="message-meta">({{ message.created_at|date:"Y-m-d H:i" }})</span>
+            {% if user == selected_blog.user or user == message.user %}
+              <form method="post" action="{% url 'delete_message' message.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                {% csrf_token %}
+                <button type="submit">🗑 Delete</button>
+              </form>
+            {% endif %}
+          </li>
+        {% empty %}
+          <li>No messages yet.</li>
+        {% endfor %}
+      </ul>
+
+      <h4>Post a message on this blog:</h4>
+      <form method="post" action="{% url 'post_message_on_blog' selected_blog.id %}">
+        {% csrf_token %}
+        {{ message_form.as_p }}
+        <button type="submit">➕ Post Message</button>
+      </form>
+    {% endif %}
+
+    {% if selected_blog %}
+      {# Removed the "Posts in" heading and "No posts yet." text as requested #}
+      {% if selected_blog.description %}
+        <p class="post-description">{{ selected_blog.description }}</p>
+      {% endif %}
+      <ul class="post-list">
+        {% for post in posts %}
+          <li>
+            <a href="{% url 'post_detail' post.id %}"><strong>{{ post.title }}</strong></a>
+            <p class="post-content">{{ post.content }}</p>
+
+            <h4>Messages:</h4>
+            <ul class="message-list">
+              {% for message in post_messages|get_item:post.id %}
+                <li>
+                  {% if message.user.userprofile.profile_picture %}
+                    <img src="{{ message.user.userprofile.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+                  {% endif %}
+                  <strong>{{ message.user.userprofile.nickname|default:message.user.username }}:</strong>
+                  <span class="message-content">{{ message.content }}</span>
+                  <span class="message-meta">({{ message.created_at|date:"Y-m-d H:i" }})</span>
+                  {% if user == selected_blog.user or user == message.user %}
+                    <form method="post" action="{% url 'delete_message' message.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                      {% csrf_token %}
+                      <button type="submit">🗑 Delete</button>
+                    </form>
+                  {% endif %}
+                </li>
+              {% empty %}
+                {# Removed "No posts yet." text #}
+              {% endfor %}
+            </ul>
+
+            <h4>Post a message:</h4>
+            <form method="post" action="{% url 'post_message_on_post' post.id %}">
+              {% csrf_token %}
+              {{ message_form.as_p }}
+              <button type="submit">➕ Post Message</button>
+            </form>
+          </li>
+        {% empty %}
+          {# Removed "No posts yet." text #}
+        {% endfor %}
+      </ul>
+
+      {% if posts.has_other_pages %}
+        <div class="pagination">
+          {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}{% if selected_blog %}&blog_id={{ selected_blog.id }}{% endif %}">← Previous</a>
+          {% endif %}
+          <span>Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+          {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}{% if selected_blog %}&blog_id={{ selected_blog.id }}{% endif %}">Next →</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endblock %}
